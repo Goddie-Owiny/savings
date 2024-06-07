@@ -6,6 +6,7 @@ import uuid
 
 
 # Create your models here.
+# registering a new member to the group
 class Member(models.Model):
     contact_regex = r'^(\+256|0)\d{9}$'   # Regex for contact
     contact_validator = RegexValidator(
@@ -36,7 +37,7 @@ class Member(models.Model):
     def __str__(self):
         return self.name
     
-
+# user saving money
 class Save(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, null=False, blank=False, related_name='member')
     amount = models.PositiveIntegerField(null=False, blank=False, default=0, validators=[MinValueValidator(10000)])
@@ -45,3 +46,14 @@ class Save(models.Model):
 
     def __str__(self):
         return str(self.member) 
+    
+
+# giving out loans
+class Loan(models.Model):
+    reciever = models.ForeignKey(Save, on_delete=models.CASCADE, null=False, blank=False)
+    amount_borrowed = models.PositiveIntegerField(null=False, blank=False, default=0, validators=[MinValueValidator(10000)])
+    witness = models.ForeignKey(Member, on_delete=models.CASCADE, null=False, blank=False)
+    loan_date = models.DateTimeField(null=False, blank=False, default=datetime.now)
+
+    def __str__(self):
+        return str(self.amount_borrowed)
