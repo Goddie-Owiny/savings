@@ -1,42 +1,48 @@
-{% extends 'savingsApp/base.html' %}
-
-{% load crispy_forms_tags %}
-
+{% extends 'savingsApp/base.html' %} {% load crispy_forms_tags %} 
 {% block content %}
-  <div class="container">
 
-  <form method="POST" enctype="multipart/form-data">
+<h1 class"text-4xl">Register new Members here</h1> <hr>
+<div class="container w-50 mx-auto p-5 my-5 bg-slate-200 border-1 border-solid border-slate-500 rounded-2xl">
+  <form method="POST" enctype="multipart/form-data" class="mt-3">
     {% csrf_token %}
     <div class="row">
       <div class="form-group col-md-6 mb-0">
         {{ form.name|as_crispy_field }}
       </div>
-      <div class="form-group col-md-4 mb-0">
+      <div class="form-group col-md-6 mb-0">
         {{ form.user_number|as_crispy_field }}
       </div>
-      <div class="form-group col-md-6 mb-0">
-        {{ form.NIN|as_crispy_field }}
-      </div>
-      <div class="form-group col-md-2 mb-0">
-        {{ form.gender|as_crispy_field }}
-      </div>
-    </div>
-    {{ form.next_of_kin|as_crispy_field }}
-    <div class="row">
+      <div class="form-group col-md-6 mb-0">{{ form.NIN|as_crispy_field }}</div>
       <div class="form-group col-md-6 mb-0">
         {{ form.email|as_crispy_field }}
       </div>
-      <div class="form-group col-md-3 mb-0">
-        {{ form.contact|as_crispy_field }}
-      </div>
-      <div class="form-group col-md-3 mb-0">
+    </div>
+
+    <div class="row">
+      <div class="form-group col-md-6 mb-0">
         {{ form.location|as_crispy_field }}
       </div>
-      
+      <div class="form-group col-md-6 mb-0">
+        {{ form.gender|as_crispy_field }}
+      </div>
     </div>
-    {{ form.profile_photo|as_crispy_field }}
-    {{ form.date_of_registration|as_crispy_field }}
-    <button type="submit" class="btn btn-primary">Sign in</button>
+    <div class="row">
+      <div class="form-group col-md-6 mb-0">
+        {{ form.contact|as_crispy_field }}
+      </div>
+      <div class="form-group col-md-6 mb-0">
+        {{ form.next_of_kin|as_crispy_field }}
+      </div>
+    </div>
+    <div class="form-group mb-0">
+        {{ form.profile_photo|as_crispy_field }}
+    </div>
+    {% comment %} <div class="form-group mb-0">
+      {{ form.date_of_registration|as_crispy_field }}
+    </div> {% endcomment %}
+    
+    
+    <button type="submit" class="btn dark:bg-blue-800 text-light rounded-lg">Submit</button>
   </form>
-  </div>
+</div>
 {% endblock %}

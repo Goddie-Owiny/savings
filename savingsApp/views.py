@@ -40,3 +40,17 @@ def save(request, id):
     else:
         form = SavingsForm()
     return render(request, 'SavingsApp/save.html', {'form': form})
+
+#giving loans
+def loan(request):
+    form = LoanForm()
+    if request.method == 'POST':
+        form = LoanForm(request.POST)
+        if form.is_valid():
+            print(form)
+            form.save()
+            return redirect('dashboard')
+    
+    return render(request, 'savingsApp/give_loan.html' , {'form': form})
+
+

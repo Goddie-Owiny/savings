@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator, MinLengthValidator, MinValueValidator
-
+from django.core.exceptions import ValidationError
 from datetime import datetime
 import uuid
 
@@ -32,7 +32,7 @@ class Member(models.Model):
     location = models.CharField(max_length=100)
     gender = models.CharField(choices=gender_choices, max_length=10)
     next_of_kin = models.CharField(max_length=100, validators=[name_validator])
-    date_of_registration = models.DateField(null=False, blank=False, default=datetime.now)
+    date_of_registration = models.DateField(null=False, blank=True, default=datetime.now)
 
     def __str__(self):
         return self.name
@@ -40,6 +40,7 @@ class Member(models.Model):
 # user saving money
 class Save(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, null=False, blank=False, related_name='member')
+    user_number = models.IntegerField(null=False, blank=False, default="none")
     amount = models.PositiveIntegerField(null=False, blank=False, default=0, validators=[MinValueValidator(10000)])
     save_time = models.TimeField(null=False, blank=False, default=datetime.now)
     identity = models.UUIDField(null=False, blank=True, default=uuid.uuid4, unique=True)
@@ -53,7 +54,12 @@ class Loan(models.Model):
     reciever = models.ForeignKey(Save, on_delete=models.CASCADE, null=False, blank=False)
     amount_borrowed = models.PositiveIntegerField(null=False, blank=False, default=0, validators=[MinValueValidator(10000)])
     witness = models.ForeignKey(Member, on_delete=models.CASCADE, null=False, blank=False)
-    loan_date = models.DateTimeField(null=False, blank=False, default=datetime.now)
+    loan_date = models.DateTimeField(null=False, blank=True, default=datetime.now)
 
     def __str__(self):
         return str(self.amount_borrowed)
+    
+    def save(self, *args, **kwargs):
+        if self.amount_borrowed > self.reciever.amount:
+            raise ValidationError('Cannot borrow more than the amount saved.')
+        super().save(*args, **kwargs)

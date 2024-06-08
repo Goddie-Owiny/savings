@@ -1,0 +1,46 @@
+{% extends 'savingsApp/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="container">
+    {% if form.errors %}
+            <div class="alert alert-danger mt-3" role="alert">
+                <h4 class="alert-heading">Validation Error!</h4>
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+    {% endif %}
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="row">
+      <div class="form-group col-md-6 mb-0">
+        {{ form.reciever|as_crispy_field }}
+      </div>
+      <div class="form-group col-md-4 mb-0">
+        {{ form.amount_borrowed|as_crispy_field }}
+      </div>
+      <div class="form-group col-md-4 mb-0">
+        {{ form.witness|as_crispy_field }}
+      </div>
+      {% comment %} <div class="form-group col-md-6 mb-0">
+        {{ form.loan_date|as_crispy_field }}
+      </div> {% endcomment %}
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </form>
+  </div>
+{% endblock %}
+
+
+reciever = models.ForeignKey(Save, on_delete=models.CASCADE, null=False, blank=False)
+amount_borrowed = models.PositiveIntegerField(null=False, blank=False, default=0, validators=[MinValueValidator(10000)])
+witness = models.ForeignKey(Member, on_delete=models.CASCADE, null=False, blank=False)
+loan_date = models.DateTimeField(null=False, blank=False, default=datetime.now)
