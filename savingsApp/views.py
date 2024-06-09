@@ -2,12 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from . models import *
 from . forms import *
 from django.http import HttpResponseBadRequest
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 # Create your views here.
+@login_required
 def dashboard(request):
     user = Member.objects.all().order_by('name')
     return render(request, 'savingsApp/dashboard.html' , {'user': user})
 
+@login_required
 def mem_reg(request):
     form = MemberForm()
     if request.method == 'POST':
@@ -21,7 +25,7 @@ def mem_reg(request):
 
 
 
-
+@login_required
 def save(request, id):
     current_save = get_object_or_404(Save, id=id)
     if request.method == 'POST':
@@ -42,15 +46,23 @@ def save(request, id):
     return render(request, 'SavingsApp/save.html', {'form': form})
 
 #giving loans
+@login_required
 def loan(request):
     form = LoanForm()
     if request.method == 'POST':
         form = LoanForm(request.POST)
         if form.is_valid():
-            print(form)
             form.save()
             return redirect('dashboard')
     
     return render(request, 'savingsApp/give_loan.html' , {'form': form})
 
 
+
+
+
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('/login') # redirect user to the login page

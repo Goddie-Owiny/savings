@@ -1,8 +1,8 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleButton = document.getElementById('toggleSidebar');
+document.addEventListener('DOMContentLoaded', function() {
+    const toggler = document.getElementById('drawer-toggler');
     const sidebar = document.getElementById('logo-sidebar');
-
-    toggleButton.addEventListener('click', () => {
-        sidebar.classList.toggle('-translate-x-full');
+    
+    toggler.addEventListener('click', function() {
+        sidebar.classList.toggle('hidden');
     });
 });
