@@ -10,5 +10,5 @@ urlpatterns = [
     path('save/<int:id>', save, name='save'),
     path('loan', loan, name='loan'),
 
-     path('logout/', logout_view, name='logout'), #logout route
+    path('logout/', logout_view, name='logout'), #logout route
 ] 
