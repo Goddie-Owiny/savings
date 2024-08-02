@@ -1,16 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from . models import *
-from . forms import *
+from django.urls import reverse
 from django.http import HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.contrib.auth import logout
+from . models import *
+from . forms import *
 
 # Create your views here.
 @login_required
 def dashboard(request):
-    user = Member.objects.all().order_by('name')
-    return render(request, 'savingsApp/dashboard.html' , {'user': user})
+    member_list = Member.objects.all().order_by('id')
+    paginator = Paginator(member_list, 10)  # Show 10 members per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'savingsApp/dashboard.html', {'page_obj': page_obj} )
 
+@login_required
 @login_required
 def mem_reg(request):
     form = MemberForm()
@@ -18,10 +24,12 @@ def mem_reg(request):
         form = MemberForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            print(form)
             return redirect('dashboard')
-    
-    return render(request, 'savingsApp/mem_reg.html' , {'form': form})
+        else:
+            # Render the form with errors
+            return render(request, 'savingsApp/mem_reg.html', {'form': form})
+  
+    return render(request, 'savingsApp/mem_reg.html', {'form': form})
 
 
 
@@ -65,4 +73,4 @@ def loan(request):
 @login_required
 def logout_view(request):
     logout(request)
-    return redirect('/login') # redirect user to the login page
+    return redirect(reverse('login'))  # Assuming you have a URL pattern named 'login'

@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import RegexValidator, MinLengthValidator, MinValueValidator
 from django.core.exceptions import ValidationError
-from datetime import datetime
+from django.utils import timezone
 import uuid
 
 
@@ -25,14 +25,14 @@ class Member(models.Model):
 
     name = models.CharField(max_length=100, validators= [name_validator])
     user_number = models.IntegerField(null=False, blank=False, unique=True)
-    NIN = models.CharField(max_length=14, unique=True)
+    NIN = models.CharField(max_length=14, unique=True, db_index=True)
     contact = models.CharField(max_length=13, validators=[MinLengthValidator(10), contact_validator])
     email = models.EmailField(null=False, blank=False, unique=True)
     profile_photo = models.ImageField(null=False, blank=False, upload_to='uploads')
     location = models.CharField(max_length=100)
     gender = models.CharField(choices=gender_choices, max_length=10)
     next_of_kin = models.CharField(max_length=100, validators=[name_validator])
-    date_of_registration = models.DateField(null=False, blank=True, default=datetime.now)
+    date_of_registration = models.DateField(null=False, blank=True, auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -42,7 +42,7 @@ class Save(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, null=False, blank=False, related_name='member')
     user_number = models.IntegerField(null=False, blank=False, default="none")
     amount = models.PositiveIntegerField(null=False, blank=False, default=0, validators=[MinValueValidator(10000)])
-    save_time = models.TimeField(null=False, blank=False, default=datetime.now)
+    save_time = models.TimeField(null=False, blank=False, auto_now_add=True)
     identity = models.UUIDField(null=False, blank=True, default=uuid.uuid4, unique=True)
 
     def __str__(self):
@@ -54,12 +54,12 @@ class Loan(models.Model):
     reciever = models.ForeignKey(Save, on_delete=models.CASCADE, null=False, blank=False)
     amount_borrowed = models.PositiveIntegerField(null=False, blank=False, default=0, validators=[MinValueValidator(10000)])
     witness = models.ForeignKey(Member, on_delete=models.CASCADE, null=False, blank=False)
-    loan_date = models.DateTimeField(null=False, blank=True, default=datetime.now)
+    loan_date = models.DateTimeField(null=False, blank=True, auto_now_add=True)
 
     def __str__(self):
         return str(self.amount_borrowed)
     
     def save(self, *args, **kwargs):
-        if self.amount_borrowed > self.reciever.amount:
-            raise ValidationError('Cannot borrow more than the amount saved.')
+        if not self.pk:  # Check if the object is being created
+            self.loan_date = timezone.now()  # Set the current date and time
         super().save(*args, **kwargs)

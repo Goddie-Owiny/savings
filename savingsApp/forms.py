@@ -12,13 +12,13 @@ class MemberForm(ModelForm):
 class SavingsForm(ModelForm):
     class Meta: 
         model = Save
-        fields = ['member', 'amount', 'save_time']
+        fields = ['member', 'amount']
 
 
 class LoanForm(forms.ModelForm):
     class Meta:
         model = Loan
-        fields = ['reciever', 'amount_borrowed', 'witness', 'loan_date']
+        fields = ['reciever', 'amount_borrowed', 'witness']
 
 
 
