@@ -1,86 +1,68 @@
 from django.test import TestCase
+from django.core.exceptions import ValidationError
+from .models import Member
 
-# Create your tests here.
-from django.test import TestCase, Client
-from django.urls import reverse
-from django.contrib.auth.models import User
-from .models import Member, Save, Loan
-
-class MemberViewsTestCase(TestCase):
-    
-    @classmethod
-    def setUpTestData(cls):
-        # Setup code to create necessary objects for tests
-        cls.client = Client()
-        cls.user = User.objects.create_user(username='testuser', password='password')
-        cls.client.login(username='testuser', password='password')
-        
-        cls.member = Member.objects.create(
-            name='John Doe',
-            user_number=1,
-            NIN='12345678901234',
-            contact='+256701234567',
-            email='john@example.com',
-            profile_photo='path/to/photo.jpg',
-            location='Kampala',
-            gender='Male',
-            next_of_kin='Jane Doe',
-        )
-        
-        cls.save = Save.objects.create(
-            member=cls.member,
-            amount=10000,
-            save_time='12:00:00'
-        )
-        
-        cls.loan = Loan.objects.create(
-            reciever=cls.save,
-            amount_borrowed=5000,
-            witness=cls.member,
-            loan_date='2024-08-01T12:00:00Z'
-        )
-        
-    def test_dashboard_view(self):
-        response = self.client.get(reverse('dashboard'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'savingsApp/dashboard.html')
-        self.assertContains(response, 'John Doe')
-
-    def test_mem_reg_view(self):
-        data = {
-            'name': 'Jane Doe',
-            'user_number': 2,
-            'NIN': '98765432109876',
-            'contact': '+256702345678',
-            'email': 'jane@example.com',
-            'profile_photo': 'path/to/photo.jpg',
-            'location': 'Entebbe',
-            'gender': 'Female',
-            'next_of_kin': 'John Doe',
+class MemberModelTestCase(TestCase):
+    def setUp(self):
+        """ Set up valid member data for tests """
+        self.valid_member_data = {
+            'name': 'John Doe',
+            'user_number': 88,
+            'NIN': '1234567H901234',
+            'contact': '+256701234567',
+            'email': 'john@example.com',
+            'profile_photo': 'path/to/photo.jpg',  # In actual tests, use a mock or a test image file.
+            'location': 'Kampala',
+            'gender': 'Male',
+            'next_of_kin': 'Jane Doe',
         }
-        response = self.client.post(reverse('mem_reg'), data)
-        self.assertEqual(response.status_code, 302)  # Redirect status code
-        self.assertTrue(Member.objects.filter(name='Jane Doe').exists())
 
-    def test_save_view(self):
-        data = {'amount': 5000}
-        response = self.client.post(reverse('save', args=[self.save.id]), data)
-        self.assertEqual(response.status_code, 302)  # Redirect status code
-        self.save.refresh_from_db()
-        self.assertEqual(self.save.amount, 15000)
+    def test_member_creation_valid(self):
+        """ Test creating a member with valid data """
+        member = Member.objects.create(**self.valid_member_data)
+        self.assertEqual(Member.objects.count(), 1)
+        self.assertEqual(member.name, 'John Doe')
+        self.assertEqual(member.contact, '+256701234567')
 
-    def test_loan_view(self):
-        data = {
-            'reciever': self.save.id,
-            'amount_borrowed': 2000,
-            'witness': self.member.id,
-            'loan_date': '2024-08-01T12:00:00Z'
-        }
-        response = self.client.post(reverse('loan'), data)
-        self.assertEqual(response.status_code, 302)  # Redirect status code
-        self.assertTrue(Loan.objects.filter(amount_borrowed=2000).exists())
+    def test_contact_validation_valid(self):
+        """ Test that a valid contact does not raise a validation error """
+        member = Member(**self.valid_member_data)
+        try:
+            member.full_clean()  # This should not raise an exception
+        except ValidationError:
+            self.fail('ValidationError raised for a valid contact number')
 
-    def test_logout_view(self):
-        response = self.client.get(reverse('logout'))
-        self.assertEqual(response.status_code, 302)  # Redirect status code
-        self.assertRedirects(response, reverse('login'))
+    def test_contact_validation_invalid(self):
+        """ Test invalid contact should raise a ValidationError """
+        invalid_contacts = [
+            '25670123456',    # Incorrect length (country code missing)
+            '+2567012345x7',  # Contains letters
+            '1234567890',     # Missing country code
+            '+2567012345678', # Too long
+        ]
+        for contact in invalid_contacts:
+            with self.assertRaises(ValidationError):
+                member = Member(contact=contact, **{k: v for k, v in self.valid_member_data.items() if k != 'contact'})
+                member.full_clean()  # This should raise ValidationError
+
+    def test_name_validation_valid(self):
+        """ Test that a valid name does not raise a validation error """
+        member = Member(**self.valid_member_data)
+        try:
+            member.full_clean()  # This should not raise an exception
+        except ValidationError:
+            self.fail('ValidationError raised for a valid name')
+
+    def test_name_validation_invalid(self):
+        """ Test invalid names should raise a ValidationError """
+        invalid_names = [
+            'John',         # Missing last name
+            'John123 Doe',  # Contains numbers
+            'John! Doe',    # Contains special characters
+            'JohnDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoe Doe',  # Too long
+        ]
+        for name in invalid_names:
+            with self.assertRaises(ValidationError):
+                member = Member(name=name, **{k: v for k, v in self.valid_member_data.items() if k != 'name'})
+                member.full_clean()  # This should raise ValidationError
+

@@ -1,0 +1,262 @@
+
+
+<!-- Modal toggle -->
+<button data-modal-target="static-modal" data-modal-toggle="static-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+  Toggle modal
+</button>
+
+<!-- Main modal -->
+<div id="static-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Static modal
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="static-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 space-y-4">
+                <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                    With less than a month to go before the European Union enacts new consumer privacy laws for its citizens, companies around the world are updating their terms of service agreements to comply.
+                </p>
+                <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                    The European Union’s General Data Protection Regulation (G.D.P.R.) goes into effect on May 25 and is meant to ensure a common set of data rights in the European Union. It requires organizations to notify users as soon as possible of high-risk data breaches that could personally affect them.
+                </p>
+            </div>
+            <!-- Modal footer -->
+            <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <button data-modal-hide="static-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">I accept</button>
+                <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Decline</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+Tests for Models.py
+from django.test import TestCase
+from django.core.exceptions import ValidationError
+from .models import Member
+
+class MemberModelTestCase(TestCase):
+    def setUp(self):
+        """ Set up valid member data for tests """
+        self.valid_member_data = {
+            'name': 'John Doe',
+            'user_number': 88,
+            'NIN': '1234567H901234',
+            'contact': '+256701234567',
+            'email': 'john@example.com',
+            'profile_photo': 'path/to/photo.jpg',  # In actual tests, use a mock or a test image file.
+            'location': 'Kampala',
+            'gender': 'Male',
+            'next_of_kin': 'Jane Doe',
+        }
+
+    def test_member_creation_valid(self):
+        """ Test creating a member with valid data """
+        member = Member.objects.create(**self.valid_member_data)
+        self.assertEqual(Member.objects.count(), 1)
+        self.assertEqual(member.name, 'John Doe')
+        self.assertEqual(member.contact, '+256701234567')
+
+    def test_contact_validation_valid(self):
+        """ Test that a valid contact does not raise a validation error """
+        member = Member(**self.valid_member_data)
+        try:
+            member.full_clean()  # This should not raise an exception
+        except ValidationError:
+            self.fail('ValidationError raised for a valid contact number')
+
+    def test_contact_validation_invalid(self):
+        """ Test invalid contact should raise a ValidationError """
+        invalid_contacts = [
+            '25670123456',    # Incorrect length (country code missing)
+            '+2567012345x7',  # Contains letters
+            '1234567890',     # Missing country code
+            '+2567012345678', # Too long
+        ]
+        for contact in invalid_contacts:
+            with self.assertRaises(ValidationError):
+                member = Member(contact=contact, **{k: v for k, v in self.valid_member_data.items() if k != 'contact'})
+                member.full_clean()  # This should raise ValidationError
+
+    def test_name_validation_valid(self):
+        """ Test that a valid name does not raise a validation error """
+        member = Member(**self.valid_member_data)
+        try:
+            member.full_clean()  # This should not raise an exception
+        except ValidationError:
+            self.fail('ValidationError raised for a valid name')
+
+    def test_name_validation_invalid(self):
+        """ Test invalid names should raise a ValidationError """
+        invalid_names = [
+            'John',         # Missing last name
+            'John123 Doe',  # Contains numbers
+            'John! Doe',    # Contains special characters
+            'JohnDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoe Doe',  # Too long
+        ]
+        for name in invalid_names:
+            with self.assertRaises(ValidationError):
+                member = Member(name=name, **{k: v for k, v in self.valid_member_data.items() if k != 'name'})
+                member.full_clean()  # This should raise ValidationError
+
+
+
+
+Form.py Test
+from django.test import TestCase
+from .models import Member, Save, Loan
+from .forms import MemberForm, SavingsForm, LoanForm
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
+
+class MemberFormTestCase(TestCase):
+    def setUp(self):
+        """ Set up valid member data for tests """
+        self.dummy_image = SimpleUploadedFile(
+        "profile_photo.jpg", b"file_content", content_type="image/jpeg"
+        )
+        self.valid_member_data = {
+            'name': 'John Doe',
+            # 'user_number': 1,
+            'NIN': '12345678901234',
+            'contact': '+256701234567',
+            'email': 'john@example.com',
+            'profile_photo': self.dummy_image,  # a dummy image to test the profile image upload.
+            'location': 'Kampala',
+            'gender': 'Male',
+            'next_of_kin': 'Jane Doe',
+        }
+
+    def test_member_form_valid(self):
+        """ Test the MemberForm with valid data """
+        form = MemberForm(data=self.valid_member_data)
+          # Check if the form is valid
+        if not form.is_valid():
+            print("Form errors:", form.errors)
+        self.assertTrue(form.is_valid())
+        member = form.save()
+        self.assertEqual(Member.objects.count(), 1)
+        self.assertEqual(member.name, 'John Doe')
+        
+
+    def test_member_form_invalid_data(self):
+        """ Test the MemberForm with invalid data """
+        invalid_data = self.valid_member_data.copy()
+        invalid_data['email'] = 'invalid-email'
+        form = MemberForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+
+class SavingsFormTestCase(TestCase):
+    def setUp(self):
+        """ Set up valid save data and member data for tests """
+        self.member = Member.objects.create(
+            name='John Doe',
+            user_number=1,
+            NIN='12345678901234',
+            contact='+256701234567',
+            email='john@example.com',
+            profile_photo='path/to/photo.jpg',  # Use a mock image path for testing
+            location='Kampala',
+            gender='Male',
+            next_of_kin='Jane Doe',
+        )
+        self.valid_savings_data = {
+            'member': self.member,
+            'amount': 15000,
+        }
+
+    def test_savings_form_valid(self):
+        """ Test the SavingsForm with valid data """
+        form = SavingsForm(data=self.valid_savings_data)
+        self.assertTrue(form.is_valid())
+        save = form.save()
+        self.assertEqual(Save.objects.count(), 1)
+        self.assertEqual(save.amount, 15000)
+
+    def test_savings_form_invalid_data(self):
+        """ Test the SavingsForm with invalid data """
+        invalid_data = self.valid_savings_data.copy()
+        invalid_data['amount'] = 5000  # Below the minimum limit
+        form = SavingsForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('amount', form.errors)
+
+class LoanFormTestCase(TestCase):
+    def setUp(self):
+        """ Set up valid save and member data for tests """
+        self.member1 = Member.objects.create(
+            name='John Doe',
+            user_number=1,
+            NIN='12345678901234',
+            contact='+256701234567',
+            email='john@example.com',
+            profile_photo='path/to/photo.jpg',  # Use a mock image path for testing
+            location='Kampala',
+            gender='Male',
+            next_of_kin='Jane Doe',
+        )
+        self.member2 = Member.objects.create(
+            name='Jane Doe',
+            user_number=2,
+            NIN='98765432109876',
+            contact='+256702345678',
+            email='jane@example.com',
+            profile_photo='path/to/photo.jpg',  # Use a mock image path for testing
+            location='Entebbe',
+            gender='Female',
+            next_of_kin='John Doe',
+        )
+        self.save = Save.objects.create(
+            member=self.member1,
+            amount=20000
+        )
+        self.valid_loan_data = {
+            'reciever': self.save,
+            'amount_borrowed': 15000,
+            'witness': self.member2,
+        }
+
+    def test_loan_form_valid(self):
+        """ Test the LoanForm with valid data """
+        form = LoanForm(data=self.valid_loan_data)
+        self.assertTrue(form.is_valid())
+        loan = form.save()
+        self.assertEqual(Loan.objects.count(), 1)
+        self.assertEqual(loan.amount_borrowed, 15000)
+
+    def test_loan_form_invalid_amount(self):
+        """ Test LoanForm with amount_borrowed below the minimum limit """
+        invalid_data = self.valid_loan_data.copy()
+        invalid_data['amount_borrowed'] = 5000
+        form = LoanForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('amount_borrowed', form.errors)
+
+    # def test_loan_form_same_reciever_and_witness(self):
+    #     """ Test LoanForm with the same receiver and witness """
+    #     invalid_data = self.valid_loan_data.copy()
+    #     invalid_data['witness'] = self.member1
+    #     form = LoanForm(data=invalid_data)
+    #     self.assertFalse(form.is_valid())
+    #     self.assertIn('__all__', form.errors)
+
+    # def test_loan_form_borrowing_more_than_savings(self):
+    #     """ Test LoanForm with borrowing more than saved amount """
+    #     invalid_data = self.valid_loan_data.copy()
+    #     invalid_data['amount_borrowed'] = 25000  # More than the saved amount
+    #     form = LoanForm(data=invalid_data)
+    #     self.assertFalse(form.is_valid())
+    #     self.assertIn('amount_borrowed', form.errors)
+

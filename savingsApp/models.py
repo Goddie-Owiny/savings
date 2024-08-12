@@ -8,10 +8,10 @@ import uuid
 # Create your models here.
 # registering a new member to the group
 class Member(models.Model):
-    contact_regex = r'^(\+256|0)\d{9}$'   # Regex for contact
+    contact_regex = r'^(\+256|0)\d{9}$'  # Regex for contact
     contact_validator = RegexValidator(
-    regex=contact_regex,
-    message='Enter a valid Country contact'
+        regex=contact_regex,
+        message='Enter a valid Country contact'
     )
 
     name_regex = r'^(?=.{1,100}$)[A-Za-z]+(?:[\'\s-][A-Za-z]+)* [A-Za-z]+(?:[\'\s-][A-Za-z]+)*$'
@@ -40,7 +40,7 @@ class Member(models.Model):
 # user saving money
 class Save(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, null=False, blank=False, related_name='member')
-    user_number = models.IntegerField(null=False, blank=False, default="none")
+    user_number = models.IntegerField(null=False, blank=False)
     amount = models.PositiveIntegerField(null=False, blank=False, default=0, validators=[MinValueValidator(10000)])
     save_time = models.TimeField(null=False, blank=False, auto_now_add=True)
     identity = models.UUIDField(null=False, blank=True, default=uuid.uuid4, unique=True)
