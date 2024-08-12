@@ -1,22 +1,23 @@
-name: Savings app Test    # its name
+name: Django App Test    # Name of the CI/CD workflow
 
-on: [push, pull_request]     # Trigger
+on: 
+  push:
+    branches: [main]     # Trigger on push to main branch
+  pull_request:
+    branches: [main]     # Trigger on pull request to main branch
 
-jobs:                 # job
+jobs:
   run-tests:
-    strategy: 
-      fail-fast: false  # To avoid cascading failures
+    strategy:
+      fail-fast: false  # Avoid cascading failures
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version:
-          # - '3.6'
-          # - '3.7'
           - '3.8'
           - '3.9'
           - '3.10'
           - '3.11'
           - '3.12'
-          # - 'pypy3.7'
           - 'pypy3.9'
           - 'pypy3.10'
 
@@ -37,6 +38,11 @@ jobs:                 # job
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Set up Django database
+      run: |
+        python manage.py migrate --noinput
+        python manage.py collectstatic --noinput
+
     - name: Run tests
       run: |
-        pytest
+        python manage.py test
