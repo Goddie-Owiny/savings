@@ -2,9 +2,9 @@ name: Django App Test    # Name of the CI/CD workflow
 
 on: 
   push:
-    branches: [main]     # Trigger on push to main branch
+    branches: [master]     # Trigger on push to master branch
   pull_request:
-    branches: [main]     # Trigger on pull request to main branch
+    branches: [master]     # Trigger on pull request to master branch
 
 jobs:
   run-tests:
