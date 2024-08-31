@@ -7,12 +7,15 @@ from django.contrib.auth import logout
 from django.db.models import Q
 from . models import *
 from . forms import *
+import plotly.graph_objects as go   # type: ignore
+import plotly.io as pio    # type: ignore
 
 # Create your views here.
 @login_required
 def dashboard(request):
     total_members = Member.objects.count()
     total_savings = Save.objects.aggregate(total_savings=models.Sum('amount'))['total_savings'] or 0
+    total_loan = Loan.objects.aggregate(total_loan=models.Sum('amount_borrowed'))['total_loan'] or 0
     average_savings = Save.objects.aggregate(average_savings=models.Avg('amount'))['average_savings'] or 0
 
     search_query = request.GET.get('search', '')
@@ -28,11 +31,21 @@ def dashboard(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Pie chart data
+    pie_chart_labels = ['Total Loans', 'Average Savings']
+    pie_chart_values = [total_loan, average_savings]
+    pie_chart_colors = ['#374151', '#1e3a8a']
+    pie_chart_data = go.Pie(labels=pie_chart_labels, values=pie_chart_values, marker=dict(colors=pie_chart_colors))
+    pie_chart_layout = go.Layout(title='Savings Breakdown')
+    pie_chart = go.Figure(data=[pie_chart_data], layout=pie_chart_layout)
+    pie_chart_json = pio.to_json(pie_chart)     # convert to json
+
     context = {
         'total_members': total_members,
         'total_savings': total_savings,
         'average_savings': average_savings,
         'page_obj': page_obj,
+        'pie_chart_json': pie_chart_json,  
         # other context variables...
     }
     
