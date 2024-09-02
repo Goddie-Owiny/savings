@@ -9,6 +9,11 @@ from . models import *
 from . forms import *
 import plotly.graph_objects as go   # type: ignore
 import plotly.io as pio    # type: ignore
+from django.db.models import Sum, ExpressionWrapper, DecimalField, F
+from django.db.models.functions import TruncMonth
+import pandas as pd   # type: ignore
+import plotly.express as px     # type: ignore
+from plotly.offline import plot  # type: ignore
 
 # Create your views here.
 @login_required
@@ -36,9 +41,19 @@ def dashboard(request):
     pie_chart_values = [total_loan, average_savings]
     pie_chart_colors = ['#374151', '#1e3a8a']
     pie_chart_data = go.Pie(labels=pie_chart_labels, values=pie_chart_values, marker=dict(colors=pie_chart_colors))
-    pie_chart_layout = go.Layout(title='Savings Breakdown')
+    pie_chart_layout = go.Layout(title='Savings Breakdown', width=600, height=500)
     pie_chart = go.Figure(data=[pie_chart_data], layout=pie_chart_layout)
     pie_chart_json = pio.to_json(pie_chart)     # convert to json
+
+    # Line chart data
+    weekly_savings = [150, 635, 175, 800, 190, 510, 360]
+    days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    # Create the bar chart
+    bar_chart_data = go.Bar(x=days_of_week, y=weekly_savings, marker=dict(color='#1e3a8a'))
+    bar_chart_layout = go.Layout(title='Weekly Savings Total')
+    bar_chart = go.Figure(data=[bar_chart_data], layout=bar_chart_layout)
+    bar_chart_json = pio.to_json(bar_chart)   # Convert the bar chart to JSON
 
     context = {
         'total_members': total_members,
@@ -46,6 +61,7 @@ def dashboard(request):
         'average_savings': average_savings,
         'page_obj': page_obj,
         'pie_chart_json': pie_chart_json,  
+        'bar_chart_json': bar_chart_json,   # convert to json
         # other context variables...
     }
     
