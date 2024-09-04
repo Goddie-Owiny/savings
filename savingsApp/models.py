@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator, MinLengthValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from PIL import Image
 import uuid
 
 
@@ -33,6 +34,20 @@ class Member(models.Model):
     gender = models.CharField(choices=gender_choices, max_length=10)
     next_of_kin = models.CharField(max_length=100, validators=[name_validator])
     date_of_registration = models.DateField(null=False, blank=True, auto_now_add=True)
+
+
+    # handline profile image
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.profile_photo:
+            img = Image.open(self.profile_photo.path)
+
+            # Resize the image
+            if img.height > 300 or img.width > 300:
+                output_size = (300, 300)
+                img.thumbnail(output_size)
+                img.save(self.profile_photo.path)
 
     def __str__(self):
         return self.name

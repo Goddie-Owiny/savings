@@ -1,15 +1,8 @@
-body{
+body {
   background-color: rgba(208, 204, 204, 0.959);
 }
 
-h1{
-  color: red;
-  text-align: center;
-  font-size: 12em;
-  font-weight: bolder;
-}
-
-.asteriskField{
+.asteriskField {
   color: red;
 }
 
@@ -17,8 +10,7 @@ h1{
   background-color: #1e3a8a;
   color: white;
   box-shadow: 0 8px 24px 0 rgb(16 39 112 / 20%);
- }
- 
+}
 
 /* Login form styles */
 .container {
@@ -160,3 +152,27 @@ h1{
   font-size: 9px;
 }
 
+.table-hover:hover{
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease-in-out;
+}
+
+@media screen and (max-width: 768px) {
+  .table th:nth-child(6), .table td:nth-child(6) {
+      display: none;
+  }
+}
+
+
+/* #members{
+  color: red;
+  font-weight: bold;
+  margin-top: 20px;
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 10px;
+} */

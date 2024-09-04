@@ -1,15 +1,15 @@
 {% extends 'savingsApp/base.html' %} 
 {% load static %}
 
-    <title>Savings | Dashboard</title>
-    <!-- Load Google Charts Library -->
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
-    <!-- Include any additional CSS or JS files here -->
+<title>Savings | Dashboard</title>
+<!-- Load Google Charts Library -->
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<!-- Include any additional CSS or JS files here -->
 </head>
 <body>
   {% block content %}
     <div class="container-fluid">
-       <!-- Key Metrics Section -->
+        <!-- Key Metrics Section -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div class="text-white p-4 rounded shadow-md dark:bg-gray-600">
                 <h2 class="text-lg font-bold">Total Members</h2>
@@ -17,24 +17,40 @@
             </div>
             <div class="text-white p-4 rounded shadow-md dark:bg-gray-700">
                 <h2 class="text-lg font-bold">Total Savings</h2>
-                <p class="text-xl">UGX.{{ total_savings|floatformat:2 }}</p>
+                <p class="text-xl">UGX. {{ total_savings|floatformat:2 }}</p>
             </div>
             <div class="text-white p-4 rounded shadow-md dark:bg-gray-800">
                 <h2 class="text-lg font-bold">Average Savings</h2>
-                <p class="text-xl">UGX.{{ average_savings|floatformat:2 }}</p>
+                <p class="text-xl">UGX. {{ average_savings|floatformat:2 }}</p>
             </div>
         </div>
 
-            <!-- Charts and Graphs section -->
-        <div class="row">
-            <div class="col-md-6 col-sm-12 content-center" id="savings-pie-chart"></div>
-            <div class="col-md-6 col-sm-12" id="savings-bar-chart"></div>
+        <!-- Charts and Graphs section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="savings-pie-chart"></div>
+            <div id="savings-bar-chart"></div>
         </div>
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var pie_chart_data = {{ pie_chart_json|safe }};
+        
+                // Resize chart to fit the container on window resize
+                window.addEventListener('resize', function() {
+                    Plotly.relayout('savings-pie-chart', {
+                        width: document.getElementById('savings-pie-chart').clientWidth,
+                        height: document.getElementById('savings-pie-chart').clientWidth // Square aspect ratio
+                    });
+                });
+        
+                // Initial Plot
                 Plotly.newPlot('savings-pie-chart', pie_chart_data.data, pie_chart_data.layout, {responsive: true});
+        
+                // Ensure the chart is responsive on initial load
+                Plotly.relayout('savings-pie-chart', {
+                    width: document.getElementById('savings-pie-chart').clientWidth,
+                    height: document.getElementById('savings-pie-chart').clientWidth
+                });
             });
         </script>
 
@@ -44,49 +60,56 @@
                 Plotly.newPlot('savings-bar-chart', bar_chart_data.data, bar_chart_data.layout, {responsive: true});
             });
         </script>
-        
 
         <!-- Table -->
-        <h2 class="text-2xl text-center mb-5">Registered Members of the Group</h2>
+        <h2 id="members" class="text-4xl text-center font-bold text-blue-800 pt-5">Registered Members of the Group</h2>
+
         <!-- Search form for the members from the table -->
         <div class="form-container my-4 flex justify-center">
-            <form method="GET" class="flex space-x-2">
-                <input type="text" name="search" class="form-control px-4 py-2 w-full md:w-1/2" placeholder="Search by Names or Member Number">
+            <form method="GET" class="flex space-x-2 w-full md:w-1/2">
+                <input type="text" name="search" class="form-control px-4 py-2 w-full" placeholder="Search by Names or Member Number">
                 <button type="submit" class="btn btn-primary px-4 py-2 bg-blue-600 text-white rounded-md">Search</button>
             </form>
         </div>
 
         <!-- Table with members' information -->
-        <table class="table table-striped table-responsive">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Location</th>
-                    <th>Next of Kin</th>
-                    <th>Photo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in page_obj %}
-                <tr data-href="{% url 'save' user.id %}">
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.contact }}</td>
-                    <td>{{ user.location }}</td>
-                    <td>{{ user.next_of_kin }}</td>
-                    <!-- Uncomment this if you want to display the user's photo -->
-                    <!-- <td><img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'default-profile.png' %}{% endif %}" alt="{{ user.name }}'s photo" width="100" height="100"></td> -->
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6">No members found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered table-striped">
+                <thead style="background-color: #1f2937; color: white;">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Next of Kin</th>
+                        <th>Photo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in page_obj %}
+                    <tr data-href="{% url 'save' user.id %}">
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.contact }}</td>
+                        <td>{{ user.location }}</td>
+                        <td>{{ user.next_of_kin }}</td>
+                        <!-- Display the user's photo if it exists, otherwise show the default profile image -->
+                        <td>
+                            <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" 
+                                 alt="{{ user.name }}'s photo" 
+                                 width="100" 
+                                 height="100">
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No members found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const rows = document.querySelectorAll('tr[data-href]');
@@ -97,7 +120,6 @@
                 });
             });
         </script>
-        
 
         <!-- Pagination Controls -->
         <nav aria-label="Page navigation">
@@ -137,9 +159,8 @@
                 {% endif %}
             </ul>
         </nav>
-        <div class="container dark:bg-gray-800">
-            <img src="{% static 'images/footer-image.jpg' %}" alt="footer-image">
+        <div class="container dark:bg-gray-800 mt-4">
+            <img src="{% static 'images/footer-image.jpg' %}" alt="footer-image" class="w-full">
         </div>
     </div>
-    
   {% endblock %}

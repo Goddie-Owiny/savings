@@ -45,15 +45,32 @@ def dashboard(request):
     pie_chart = go.Figure(data=[pie_chart_data], layout=pie_chart_layout)
     pie_chart_json = pio.to_json(pie_chart)     # convert to json
 
-    # Line chart data
+    # Data for the line chart
     weekly_savings = [150, 635, 175, 800, 190, 510, 360]
-    days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    weekly_loans = [75, 232, 85, 20, 44, 23, 50]
+    weekly_welfares = [5, 22, 385, 80, 44, 23, 10]
+    days_of_week = ['MoN', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
 
-    # Create the bar chart
-    bar_chart_data = go.Bar(x=days_of_week, y=weekly_savings, marker=dict(color='#1e3a8a'))
-    bar_chart_layout = go.Layout(title='Weekly Savings Total')
-    bar_chart = go.Figure(data=[bar_chart_data], layout=bar_chart_layout)
-    bar_chart_json = pio.to_json(bar_chart)   # Convert the bar chart to JSON
+    # Create the line chart with both savings and loans
+    fig = go.Figure()
+
+    # Drawing chart lines
+    fig.add_trace(go.Scatter(x=days_of_week, y=weekly_savings, mode='lines+markers', name='Weekly Savings', line=dict(color='#1e3a8a')))   # weekly Savings
+
+    fig.add_trace(go.Scatter(x=days_of_week, y=weekly_loans, mode='lines+markers', name='Weekly Loans', line=dict(color='brown')))      # weekly Loans
+
+    fig.add_trace(go.Scatter(x=days_of_week, y=weekly_welfares, mode='lines+markers', name='Weekly Welfares', line=dict(color='green')))  # weekly welfares
+
+    # Update layout for better visualization
+    fig.update_layout(
+        title='Line Chart',
+        xaxis_title='Days of the Week',
+        yaxis_title='Amount (UGX)',
+        template='plotly'
+    )
+
+    # Displaying the chart
+    line_chart_json = pio.to_json(fig) 
 
     context = {
         'total_members': total_members,
@@ -61,7 +78,7 @@ def dashboard(request):
         'average_savings': average_savings,
         'page_obj': page_obj,
         'pie_chart_json': pie_chart_json,  
-        'bar_chart_json': bar_chart_json,   # convert to json
+        'bar_chart_json': line_chart_json,   # convert to json
         # other context variables...
     }
     
