@@ -99,7 +99,42 @@ def mem_reg(request):
   
     return render(request, 'savingsApp/mem_reg.html', {'form': form})
 
+# @login_required
+# def member_detail(request, pk):
+#     member = get_object_or_404(Member, id=pk)
+#     savings = Save.objects.all()
+#     loans = Loan.objects.all()
+#     return render(request,'savingsApp/member_detail.html', {'member': member,'savings': savings, 'loans': loans})
 
+@login_required
+def member_detail_and_loan(request, pk):
+    # Get the member details
+    member = get_object_or_404(Member, id=pk)
+    
+    # Filter savings related to the member
+    savings = Save.objects.filter(member=member)
+    
+    # Filter loans related to the member's savings
+    loans = Loan.objects.filter(reciever__member=member) 
+    
+    # Handle the loan form
+    form = LoanForm()
+    if request.method == 'POST':
+        form = LoanForm(request.POST)
+        if form.is_valid():
+            loan = form.save(commit=False)
+            # You need to assign a Save instance (not Member) to loan.reciever
+            loan.reciever = savings.first()  # Assign the first saving entry for now
+            loan.save()
+            return redirect('dashboard')
+
+    # Render the template with both member details and loan form
+    return render(request, 'savingsApp/member_detail.html', {
+        'member': member,
+        'savings': savings,
+        'loans': loans,
+        'form': form
+    })
 
 @login_required
 def save(request, id):
@@ -122,16 +157,16 @@ def save(request, id):
     return render(request, 'SavingsApp/save.html', {'form': form})
 
 #giving loans
-@login_required
-def loan(request):
-    form = LoanForm()
-    if request.method == 'POST':
-        form = LoanForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard')
+# @login_required
+# def loan(request):
+#     form = LoanForm()
+#     if request.method == 'POST':
+#         form = LoanForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('dashboard')
     
-    return render(request, 'savingsApp/give_loan.html' , {'form': form})
+#     return render(request, 'savingsApp/member_detail.html' , {'form': form})
 
 
 

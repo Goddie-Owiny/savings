@@ -13,7 +13,7 @@ body {
 }
 
 /* Login form styles */
-.container {
+.container-form {
   max-width: 400px;
   background: #e2e8f0;
   /* background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(244, 247, 251) 100%); */
@@ -163,16 +163,3 @@ body {
   }
 }
 
-
-/* #members{
-  color: red;
-  font-weight: bold;
-  margin-top: 20px;
-  text-align: center;
-  font-size: 20px;
-  margin-bottom: 20px;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
-  padding: 20px;
-  border-radius: 10px;
-} */

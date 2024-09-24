@@ -34,7 +34,7 @@ class LoanForm(forms.ModelForm):
         reciever = cleaned_data.get('reciever')
         witness = cleaned_data.get('witness')
 
-        if reciever and witness and reciever.user_number == witness.user_number:
+        if reciever and witness or reciever.user_number == witness.user_number:
             raise forms.ValidationError("The receiver can't be the same person as the witness.")
 
         # Add more custom validation here if necessary

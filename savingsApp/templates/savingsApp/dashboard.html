@@ -11,15 +11,15 @@
     <div class="container-fluid">
         <!-- Key Metrics Section -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div class="text-white p-4 rounded shadow-md dark:bg-gray-600">
+            <div class="text-white tooltip-test p-4 rounded shadow-md dark:bg-gray-600" title="Total Group Members">
                 <h2 class="text-lg font-bold">Total Members</h2>
                 <p class="text-xl">{{ total_members }}</p>
             </div>
-            <div class="text-white p-4 rounded shadow-md dark:bg-gray-700">
+            <div class="text-white p-4 rounded shadow-md dark:bg-gray-700 tooltip-test" title="All savings made">
                 <h2 class="text-lg font-bold">Total Savings</h2>
                 <p class="text-xl">UGX. {{ total_savings|floatformat:2 }}</p>
             </div>
-            <div class="text-white p-4 rounded shadow-md dark:bg-gray-800">
+            <div class="text-white p-4 rounded shadow-md dark:bg-gray-800 tooltip-test" title="Average savings">
                 <h2 class="text-lg font-bold">Average Savings</h2>
                 <p class="text-xl">UGX. {{ average_savings|floatformat:2 }}</p>
             </div>
@@ -87,7 +87,7 @@
                 </thead>
                 <tbody>
                     {% for user in page_obj %}
-                    <tr data-href="{% url 'save' user.id %}">
+                    <tr data-href="{% url 'member_detail' user.id %}">
                         <td>{{ user.id }}</td>
                         <td>{{ user.name }}</td>
                         <td>{{ user.contact }}</td>
@@ -95,7 +95,7 @@
                         <td>{{ user.next_of_kin }}</td>
                         <!-- Display the user's photo if it exists, otherwise show the default profile image -->
                         <td>
-                            <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" 
+                            <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'images/logo.jpg' %}{% endif %}" 
                                  alt="{{ user.name }}'s photo" 
                                  width="100" 
                                  height="100">
@@ -162,5 +162,29 @@
         <div class="container dark:bg-gray-800 mt-4">
             <img src="{% static 'images/footer-image.jpg' %}" alt="footer-image" class="w-full">
         </div>
+
+        <div class="bg-white py-5">
+            <div class="">
+              <h2 class="text-center font-weight-semibold mb-5">Trusted by the world’s most innovative teams</h2>
+              <div class="row text-center">
+                <div class="col-6 col-sm-4 col-lg">
+                  <img class="img-fluid" src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg" alt="Transistor" width="158" height="48">
+                </div>
+                <div class="col-6 col-sm-4 col-lg">
+                  <img class="img-fluid" src="https://tailwindui.com/img/logos/158x48/reform-logo-gray-900.svg" alt="Reform" width="158" height="48">
+                </div>
+                <div class="col-6 col-sm-4 col-lg">
+                  <img class="img-fluid" src="https://tailwindui.com/img/logos/158x48/tuple-logo-gray-900.svg" alt="Tuple" width="158" height="48">
+                </div>
+                <div class="col-6 col-sm-4 col-lg">
+                  <img class="img-fluid" src="https://tailwindui.com/img/logos/158x48/savvycal-logo-gray-900.svg" alt="SavvyCal" width="158" height="48">
+                </div>
+                <div class="col-6 col-sm-4 col-lg">
+                  <img class="img-fluid" src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg" alt="Statamic" width="158" height="48">
+                </div>
+              </div>
+            </div>
+          </div>
+          
     </div>
   {% endblock %}
