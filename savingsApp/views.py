@@ -110,6 +110,7 @@ def mem_reg(request):
 def member_detail_and_loan(request, pk):
     # Get the member details
     member = get_object_or_404(Member, id=pk)
+    member_details = Member.objects.all()
     
     # Filter savings related to the member
     savings = Save.objects.filter(member=member)
@@ -117,20 +118,19 @@ def member_detail_and_loan(request, pk):
     # Filter loans related to the member's savings
     loans = Loan.objects.filter(reciever__member=member) 
     
-    # Handle the loan form
-    form = LoanForm()
+    # Handle the loan form, pre-fill the reciever with the first saving record
+    form = LoanForm(reciever=savings.first())
+    
     if request.method == 'POST':
-        form = LoanForm(request.POST)
+        form = LoanForm(request.POST, reciever=savings.first())
         if form.is_valid():
             loan = form.save(commit=False)
-            # You need to assign a Save instance (not Member) to loan.reciever
-            loan.reciever = savings.first()  # Assign the first saving entry for now
             loan.save()
             return redirect('dashboard')
 
     # Render the template with both member details and loan form
     return render(request, 'savingsApp/member_detail.html', {
-        'member': member,
+        'member': member_details,
         'savings': savings,
         'loans': loans,
         'form': form
@@ -139,21 +139,21 @@ def member_detail_and_loan(request, pk):
 @login_required
 def save(request, id):
     current_save = get_object_or_404(Save, id=id)
+    
     if request.method == 'POST':
-        form = SavingsForm(request.POST)
+        form = SavingsForm(request.POST, member=current_save.member)
         if form.is_valid():
             moreSavings = form.cleaned_data.get('amount')  # Use cleaned_data to get the validated data
             if moreSavings:
                 try:
                     current_save.amount += moreSavings  # Assuming current_save.amount is an integer or float
                     current_save.save()
-                    print(current_save.amount)
-                    print(current_save)
                     return redirect('dashboard')
                 except ValueError:
-                    return HttpResponseBadRequest('Invalid quantity')
+                    return HttpResponseBadRequest('Invalid amount')
     else:
-        form = SavingsForm()
+        form = SavingsForm(member=current_save.member)
+    
     return render(request, 'SavingsApp/save.html', {'form': form})
 
 #giving loans

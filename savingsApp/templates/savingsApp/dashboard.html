@@ -82,7 +82,7 @@
                         <th>Phone</th>
                         <th>Location</th>
                         <th>Next of Kin</th>
-                        <th>Photo</th>
+                        <th>Save Money</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -95,10 +95,11 @@
                         <td>{{ user.next_of_kin }}</td>
                         <!-- Display the user's photo if it exists, otherwise show the default profile image -->
                         <td>
-                            <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'images/logo.jpg' %}{% endif %}" 
+                            {% comment %} <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'images/logo.jpg' %}{% endif %}" 
                                  alt="{{ user.name }}'s photo" 
                                  width="100" 
-                                 height="100">
+                                 height="100"> {% endcomment %}
+                            <a href="{% url 'save' user.id %}" class="btn btn-primary">Deposit</a>
                         </td>
                     </tr>
                     {% empty %}

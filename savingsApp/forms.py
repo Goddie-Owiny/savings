@@ -14,11 +14,27 @@ class SavingsForm(ModelForm):
         model = Save
         fields = ['member', 'amount']
 
+    def __init__(self, *args, **kwargs):
+        # Accept initial value for member and make it read-only
+        member = kwargs.pop('member', None)
+        super().__init__(*args, **kwargs)
+        if member:
+            self.fields['member'].initial = member
+            self.fields['member'].widget.attrs['readonly'] = True  # Make it readonly
+
 
 class LoanForm(forms.ModelForm):
     class Meta:
         model = Loan
         fields = ['reciever', 'amount_borrowed', 'witness']
+
+    def __init__(self, *args, **kwargs):
+        # Accept initial values for receiver
+        reciever = kwargs.pop('reciever', None)
+        super().__init__(*args, **kwargs)
+        if reciever:
+            self.fields['reciever'].initial = reciever
+            self.fields['reciever'].widget.attrs['readonly'] = True  # Make it readonly
 
 
 

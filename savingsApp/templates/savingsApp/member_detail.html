@@ -9,6 +9,7 @@
   <meta name="Description" content="Enter your description here" />
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- Font Awesome CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <!-- Plotly JS -->
@@ -32,7 +33,7 @@
                         {% csrf_token %}
                         <div class="row">
                             <div class="form-group col-12 mb-3">
-                                {{ form.reciever|as_crispy_field }}
+                                {{ form.reciever|as_crispy_field }} <!-- Hides the field in the form -->
                             </div>
                             <div class="form-group col-12 mb-3">
                                 {{ form.amount_borrowed|as_crispy_field }}
@@ -53,17 +54,18 @@
 
     <!-- Applicant Information -->
     <div class="px-4">
-        <h3 class="h5 font-weight-semibold">Applicant Information</h3>
-        <p class="mt-1 text-muted">Personal details and application.</p>
+        <h3 class="h5 font-weight-semibold">Member Information</h3>
+        <p class="mt-1 text-muted">Personal details and Account Details.</p>
     </div>
-
+    
+    {% for user in savings %}
     <div class="mt-4 border-top">
         <dl class="row">
             <div class="col-sm-12 col-md-4 py-3">
                 <dt class="font-weight-medium">Full name</dt>
             </div>
             <div class="col-sm-12 col-md-8 py-3">
-                <dd>Margot Foster</dd>
+                <dd>{{ user.member }}</dd>
             </div>
 
             <div class="col-sm-12 col-md-4 py-3">
@@ -77,14 +79,14 @@
                 <dt class="font-weight-medium">Email address</dt>
             </div>
             <div class="col-sm-12 col-md-8 py-3">
-                <dd>margotfoster@example.com</dd>
+                <dd>{{ member.email }}</dd>
             </div>
 
             <div class="col-sm-12 col-md-4 py-3">
-                <dt class="font-weight-medium">Salary expectation</dt>
+                <dt class="font-weight-medium">Amount Saved</dt>
             </div>
             <div class="col-sm-12 col-md-8 py-3">
-                <dd>$120,000</dd>
+                <dd>UGX. {{ user.amount }}</dd>
             </div>
 
             <div class="col-sm-12 col-md-4 py-3">
@@ -105,7 +107,7 @@
                             <span class="me-2">resume_back_end_developer.pdf</span>
                             <span class="text-muted">2.4mb</span>
                         </div>
-                        <a href="#" class="text-primary">Download</a>
+                        <a href="#" class="text-primary"><i class="bi-printer"></i> Print</a>
                     </li>
                     <li class="d-flex justify-content-between py-2 px-3">
                         <div class="d-flex align-items-center">
@@ -113,7 +115,7 @@
                             <span class="me-2">coverletter_back_end_developer.pdf</span>
                             <span class="text-muted">4.5mb</span>
                         </div>
-                        <a href="#" class="text-primary">Download</a>
+                        <a href="#" class="text-primary"> <i class="bi-share"></i> Share</a>
                     </li>
                 </ul>
             </div>
@@ -124,6 +126,8 @@
             </div>
         </dl>
     </div>
+    {% endfor %}
+
 
     <!-- Floating Action Button -->
     <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg rounded-circle position-fixed" style="bottom: 20px; left: 20px;">
